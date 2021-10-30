@@ -7,9 +7,10 @@ const objectId = require("mongodb").ObjectId;
 const corse = require("cors");
 
 
-
 // User Id & Password
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.od1ig.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
+
+
 
 // middleware
 app.use(corse());
@@ -19,9 +20,10 @@ const client = new MongoClient(uri, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
+
+
 async function run() {
   try {
-
     // Craete Database and Collection
     // as package is a reserve word so that use service as a package
     await client.connect();
@@ -29,9 +31,18 @@ async function run() {
     const servicesCollection = database.collection("services");
 
     app.get("/", (req, res) => {
-        res.send("Running Traip-Travel-And-Tour-Booking server");
-      });
-  
+      res.send("Running Traip-Travel-And-Tour-Booking server");
+    });
+
+
+     // Send Data in Database
+     app.post("/services", async (req, res) => {
+      const service = req.body;
+        console.log("Send the Data in Database", service);
+      const result = await servicesCollection.insertOne(service);
+      res.send(result);
+    });
+
 
     // Get All Collection
     app.get("/services", async (req, res) => {
@@ -40,9 +51,9 @@ async function run() {
       res.send(services);
     });
 
+
     //   Get 1 Tour Package Details
     app.get("/services/:id", async (req, res) => {
-
       const id = req.params.id;
       console.log("get 1 Tour id", id);
       const query = { _id: objectId(id) };
@@ -51,21 +62,11 @@ async function run() {
       res.json(service);
     });
 
-
     app.listen(port, () => {
-        console.log("Running Traip-Travel-And-Tour-Booking server on port", port);
-      });
-      
-
-
-    // Send Data in Database
-    app.post("/services", async (req, res) => {
-      const service = req.body;
-    //   console.log("Send the Data in Database", service);
-      const result = await servicesCollection.insertOne(service);
-      res.send(result);
+      console.log("Running Traip-Travel-And-Tour-Booking server on port", port);
     });
 
+   
     //Delete any Package
     app.delete("/services/:id", async (req, res) => {
       const id = req.params.id;
@@ -74,8 +75,6 @@ async function run() {
       res.json(result);
     });
   } finally {
- 
   }
 }
 run().catch(console.dir);
-
